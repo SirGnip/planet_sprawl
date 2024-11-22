@@ -1,5 +1,5 @@
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass(frozen=True)
@@ -29,3 +29,13 @@ class Planet:
 
     def get_abbreviation(self):
         return self.name[0].upper()
+
+
+@dataclass
+class Grid:
+    width: int
+    height: int
+    planets: list[Planet] = field(default_factory=list)
+
+    def add(self, planet: Planet):
+        self.planets.append(planet)
