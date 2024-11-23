@@ -33,6 +33,7 @@ class Planet:
 
 @dataclass
 class Grid:
+    """Origin is at top-left"""
     width: int
     height: int
     planets: list[Planet] = field(default_factory=list)
