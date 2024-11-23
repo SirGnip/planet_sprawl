@@ -40,3 +40,14 @@ class Grid:
 
     def add(self, planet: Planet):
         self.planets.append(planet)
+
+@dataclass
+class Fleet:
+    owner: Player
+    source: Planet
+    destination: Planet
+    turn_launched: int
+    _arrival_turn: int = field(init=False)
+
+    def __post_init__(self):
+        self._arrival_turn = self.turn_launched + math.ceil(self.source.pos.distance(self.destination.pos))

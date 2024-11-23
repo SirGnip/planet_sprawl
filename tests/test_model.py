@@ -1,6 +1,6 @@
 import pytest
 
-from model import Point, Player, Planet, Grid
+from model import Point, Player, Planet, Grid, Fleet
 
 
 def test_point():
@@ -43,3 +43,11 @@ def test_grid():
     assert len(g.planets) == 2
     assert g.planets[0] == planet1
     assert g.planets[1] == planet2
+
+
+def test_fleet():
+    plyr1 = Player("Foo")
+    p1 = Planet(None, "Altair", Point(1, 1), 0, 0)
+    p2 = Planet(None, "Beta", Point(3, 1), 0, 0)
+    f = Fleet(plyr1, p1, p2, 5)
+    print(f)
