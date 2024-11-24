@@ -9,3 +9,10 @@ def grid_to_str(g: Grid) -> list[str]:
 
 
 
+def planets_to_str(g: Grid) -> list[str]:
+    txt = []
+    txt.append("P Ship Prd Ownr")
+    txt.append("---------------")
+    for p in g.planets:
+        txt.append(f"{p.get_abbreviation()} {p.ships:4d} {p.production:3d} {p.owner.name[:4] if p.owner else '-'}")
+    return txt
