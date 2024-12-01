@@ -1,6 +1,6 @@
 import pytest
 
-from model import Point, Player, Planet, Grid, Fleet
+from model import Point, Player, Planet, GameModel, Grid, Fleet
 
 
 def test_point():
@@ -58,3 +58,7 @@ def test_fleet():
     assert f._arrival_turn == 12
 
 
+def test_game():
+    """Basic smoke test for creating a game"""
+    game = GameModel(['Foo', 'Bar'], 6, 6)
+    game.create_planets(10)

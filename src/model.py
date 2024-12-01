@@ -1,4 +1,5 @@
 import math
+import random
 from dataclasses import dataclass, field
 
 
@@ -41,6 +42,10 @@ class Grid:
     def add(self, planet: Planet):
         self.planets.append(planet)
 
+    def get_all_points(self):
+        return [Point(x, y) for x in range(self.width) for y in range(self.height)]
+
+
 @dataclass
 class Fleet:
     owner: Player
@@ -52,3 +57,37 @@ class Fleet:
 
     def __post_init__(self):
         self._arrival_turn = self.turn_launched + math.ceil(self.source.pos.distance(self.destination.pos))
+
+
+def name_generator(first_char):
+    length = random.choice(range(3, 6))
+    vowels = "aeiou"
+    consonants = "bcdfghjklmnprstvwxyz"  # removed q
+    name = first_char
+    while len(name) < length:
+        if name[-1] in vowels:
+            name += random.choice(consonants)
+        else:
+            name += random.choice(vowels)
+    return name.title()
+
+
+class GameModel:
+    """Top-level model that holds all individual models"""
+    def __init__(self, player_names: list[str], width: int, height: int):
+        self.players = [Player(name) for name in player_names]
+        self.grid = Grid(width, height)
+        self.fleets = []
+
+    def create_planets(self, count):
+        all_points = self.grid.get_all_points()
+        random.shuffle(all_points)
+        for i in range(count):
+            name = name_generator(chr(ord('a') + i))
+            ships = random.randint(0, 10)
+            prod = random.randint(0, 10)
+            owner = None
+            if i < len(self.players):
+                owner = self.players[i]
+                ships = 50
+            self.grid.add(Planet(owner, name, all_points[i], ships, prod))

@@ -1,7 +1,7 @@
-from model import Grid, Fleet
+import model
 
 
-def grid_to_str(g: Grid) -> list[str]:
+def grid_to_str(g: model.Grid) -> list[str]:
     grid = [["." for _ in range(g.width)] for _ in range(g.height)]
     for p in g.planets:
         grid[p.pos.y][p.pos.x] = p.get_abbreviation()
@@ -9,7 +9,7 @@ def grid_to_str(g: Grid) -> list[str]:
 
 
 
-def planets_to_str(g: Grid) -> list[str]:
+def planets_to_str(g: model.Grid) -> list[str]:
     txt = []
     txt.append("P Ship Prd Ownr")
     txt.append("---------------")
@@ -18,6 +18,14 @@ def planets_to_str(g: Grid) -> list[str]:
     return txt
 
 
-def fleets_to_str(fleets: list[Fleet]) -> list[str]:
+def fleets_to_str(fleets: list[model.Fleet]) -> list[str]:
     return [f"{f.owner.name[:4]} {f.source.get_abbreviation()} {f.destination.get_abbreviation()} {f.turn_launched}" for f in fleets]
 
+
+def game_to_str(game: model.GameModel) -> list[str]:
+    txt = grid_to_str(game.grid)
+    txt.append("=" * 40)
+    txt.extend(planets_to_str(game.grid))
+    txt.append("=" * 40)
+    txt.extend(fleets_to_str(game.fleets))
+    return txt

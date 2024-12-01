@@ -1,4 +1,4 @@
-from model import Planet, Grid, Point, Player, Fleet
+from model import Planet, GameModel, Grid, Point, Player, Fleet
 import view
 
 
@@ -43,5 +43,13 @@ def test_fleet_view():
     assert 'FooB' in txt[1]
     assert 'X' in txt[0]
     assert 'Z' in txt[1]
+
+
+def test_game_view():
+    """General smoke test for the GameModel view"""
+    game = GameModel(['Foo', 'Bar'], 6, 6)
+    game.create_planets(10)
+    txt = view.game_to_str(game)
+    assert len(txt) > 1
 
 
