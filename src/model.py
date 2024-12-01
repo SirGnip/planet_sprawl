@@ -46,6 +46,7 @@ class Fleet:
     owner: Player
     source: Planet
     destination: Planet
+    ships: int
     turn_launched: int
     _arrival_turn: int = field(init=False)
 

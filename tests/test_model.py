@@ -49,5 +49,12 @@ def test_fleet():
     plyr1 = Player("Foo")
     p1 = Planet(None, "Altair", Point(1, 1), 0, 0)
     p2 = Planet(None, "Beta", Point(3, 1), 0, 0)
-    f = Fleet(plyr1, p1, p2, 5)
-    print(f)
+    f = Fleet(plyr1, p1, p2, 5, 10)
+    assert f.owner == plyr1
+    assert f.source == p1
+    assert f.destination == p2
+    assert f.ships == 5
+    assert f.turn_launched == 10
+    assert f._arrival_turn == 12
+
+

@@ -1,4 +1,4 @@
-from model import Planet, Grid, Point, Player
+from model import Planet, Grid, Point, Player, Fleet
 import view
 
 
@@ -28,3 +28,20 @@ A   15   1 Foo
 B    3   2 Budd
 C    7  10 -
  """.strip().split("\n")
+
+
+def test_fleet_view():
+    plyr1 = Player("FooBar")
+    p1 = Planet(None, "Xylex", Point(1, 1), 0, 0)
+    p2 = Planet(None, "Zeta", Point(3, 1), 0, 0)
+    f1 = Fleet(plyr1, p1, p2, 2, 10)
+    f2 = Fleet(plyr1, p2, p1, 3, 11)
+    fleets = [f1, f2]
+    txt = view.fleets_to_str(fleets)
+    assert len(txt) == 2
+    assert 'FooB' in txt[0]
+    assert 'FooB' in txt[1]
+    assert 'X' in txt[0]
+    assert 'Z' in txt[1]
+
+
