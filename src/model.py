@@ -45,6 +45,10 @@ class Grid:
     def get_all_points(self):
         return [Point(x, y) for x in range(self.width) for y in range(self.height)]
 
+    def is_complete(self) -> bool:
+        players = {p.owner for p in self.planets}
+        return len(players) < 2
+
 
 @dataclass
 class Fleet:
@@ -91,3 +95,6 @@ class GameModel:
                 owner = self.players[i]
                 ships = 50
             self.grid.add(Planet(owner, name, all_points[i], ships, prod))
+
+    def is_complete(self):
+        return self.grid.is_complete()

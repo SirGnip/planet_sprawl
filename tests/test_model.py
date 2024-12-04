@@ -43,6 +43,7 @@ def test_grid():
     assert len(g.planets) == 2
     assert g.planets[0] == planet1
     assert g.planets[1] == planet2
+    assert g.is_complete()
 
 
 def test_fleet():
@@ -62,3 +63,4 @@ def test_game():
     """Basic smoke test for creating a game"""
     game = GameModel(['Foo', 'Bar'], 6, 6)
     game.create_planets(10)
+    assert not game.is_complete()
