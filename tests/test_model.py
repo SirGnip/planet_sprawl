@@ -44,6 +44,9 @@ def test_grid():
     assert g.planets[0] == planet1
     assert g.planets[1] == planet2
     assert g.is_complete()
+    assert g.get(2, 2) == planet2
+    with pytest.raises(Exception):
+        g.get(0, 0)
 
 
 def test_fleet():
@@ -59,8 +62,20 @@ def test_fleet():
     assert f._arrival_turn == 12
 
 
+def _create_test_game() -> GameModel:
+    game = GameModel(["Foo", "Bar"], 4, 4)
+    game.grid.add(Planet(game.players[0], 'Able', Point(0, 0), 10, 1))
+    game.grid.add(Planet(game.players[1], 'Beta', Point(3, 0), 10, 1))
+    return game
+
+
 def test_game():
-    """Basic smoke test for creating a game"""
-    game = GameModel(['Foo', 'Bar'], 6, 6)
-    game.create_planets(10)
+    """Basic smoke test for the sequence of a full game"""
+    game = _create_test_game()
+    f = Fleet(game.players[0], game.grid.planets[0], game.grid.planets[1], 5, game.turn)
     assert not game.is_complete()
+    assert game.turn == 1
+    game.add_fleet(f)
+    game.simulate()
+    assert game.turn == 2
+    assert game.is_complete()
