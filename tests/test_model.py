@@ -72,7 +72,7 @@ def _create_test_game() -> GameModel:
 def test_game():
     """Basic smoke test for the sequence of a full game"""
     game = _create_test_game()
-    f = Fleet(game.players[0], game.grid.planets[0], game.grid.planets[1], 5, game.turn)
+    f = Fleet(game.players[0], game.grid.get_planet("A"), game.grid.get_planet("B"), 5, game.turn)
     assert not game.is_complete()
     assert game.turn == 1
     game.add_fleet(f)

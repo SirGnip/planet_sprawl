@@ -50,6 +50,12 @@ class Grid:
         assert len(planets) == 1
         return planets[0]
 
+    def get_planet(self, letter) -> Planet|None:
+        for p in self.planets:
+            if p.get_abbreviation() == letter:
+                return p
+        assert False, f"No planet with abbreviation: {letter}"
+
     def get_all_points(self):
         return [Point(x, y) for x in range(self.width) for y in range(self.height)]
 
@@ -115,6 +121,6 @@ class GameModel:
         """Move fleets, resolve conflicts, handle planet production"""
         # TEMP impl, just gets the tests to pass
         self.turn += 1
-        planet = self.grid.get(0, 0)
+        planet = self.grid.get_planet("A")
         planet.owner = None
 
