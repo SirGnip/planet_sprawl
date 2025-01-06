@@ -1,6 +1,8 @@
 import model
 
 
+
+
 def grid_to_str(g: model.Grid) -> list[str]:
     grid = [["." for _ in range(g.width)] for _ in range(g.height)]
     for p in g.planets:
@@ -19,7 +21,7 @@ def planets_to_str(g: model.Grid) -> list[str]:
 
 
 def fleets_to_str(fleets: list[model.Fleet]) -> list[str]:
-    return [f"{f.owner.name[:4]} {f.source.get_abbreviation()} {f.destination.get_abbreviation()} {f.turn_launched}" for f in fleets]
+    return [f"{f.owner.name[:4]} {f.source.get_abbreviation()} {f.destination.get_abbreviation()} turn:{f.turn_launched}-{f._arrival_turn} ships:{f.ships}" for f in fleets]
 
 
 def game_to_str(game: model.GameModel) -> list[str]:

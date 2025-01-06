@@ -63,6 +63,10 @@ class Grid:
         players = {p.owner for p in self.planets if p.owner is not None}
         return len(players) < 2
 
+    def produce(self) -> None:
+        for p in self.planets:
+            p.ships += p.production
+
 
 @dataclass
 class Fleet:
@@ -111,6 +115,24 @@ class GameModel:
                 ships = 50
             self.grid.add(Planet(owner, name, all_points[i], ships, prod))
 
+    def send(
+            self,
+            player_idx: int,
+            from_planet: str,
+            to_planet: str,
+            ships: int) -> None:
+        print(f"SEND: {player_idx} sends {ships} ships via {from_planet}-{to_planet}")
+        assert player_idx < len(self.players)
+        src = self.grid.get_planet(from_planet)
+        trg = self.grid.get_planet(to_planet)
+
+        player = self.players[player_idx]
+        assert player == src.owner
+        assert ships <= src.ships
+        fleet = Fleet(player, src, trg, ships, self.turn)
+        src.ships -= fleet.ships
+        self.add_fleet(fleet)
+
     def add_fleet(self, fleet: Fleet):
         self.fleets.append(fleet)
 
@@ -121,6 +143,28 @@ class GameModel:
         """Move fleets, resolve conflicts, handle planet production"""
         # TEMP impl, just gets the tests to pass
         self.turn += 1
-        planet = self.grid.get_planet("A")
-        planet.owner = None
 
+        # production
+        # self.grid.produce()
+
+        # fleets
+        new_fleets = []
+        for fleet in self.fleets:
+            if fleet._arrival_turn <= self.turn:
+                print(f"fleet hit {fleet}")
+                trg = fleet.destination
+                if fleet.owner == trg.owner:
+                    print(f"REINFORCED {trg.get_abbbreviation()}")
+                    trg.ships += fleet.ships
+                else:
+                    if fleet.ships > trg.ships:
+                        print(f"DEFEATED {trg.get_abbreviation()}")
+                        trg.owner = fleet.owner
+                        trg.ships = fleet.ships - trg.ships
+                    else:
+                        print(f"REPULSED {trg.get_abbreviation()}")
+                        trg.ships -= fleet.ships
+            else:
+                new_fleets.append(fleet)
+
+        self.fleets = new_fleets

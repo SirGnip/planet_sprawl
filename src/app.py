@@ -2,13 +2,48 @@
 import model
 import view
 
-game = model.GameModel(['Foo', 'Bar'], 6, 6)
-game.create_planets(10)
-for turn in range(3):
+
+def _create_test_game() -> model.GameModel:
+    game = model.GameModel(["Foo", "Bar"], 4, 4)
+    game.grid.add(model.Planet(game.players[0], 'Able', model.Point(0, 0), 20, 1))
+    game.grid.add(model.Planet(game.players[1], 'Beta', model.Point(3, 0), 10, 1))
+    return game
+
+
+def print_game(game):
     print()
-    print('======= Turn {} ======'.format(game.turn))
+    print("====== Turn {} ======".format(game.turn))
     print("\n".join(view.game_to_str(game)))
-    game.simulate()
-    if game.is_complete():
-        break
-print("game is complete")
+
+
+def game_loop(turn_fn):
+    game = _create_test_game()
+    while not game.is_complete():
+        print_game(game)
+        turn_fn(game)
+        game.simulate()
+        if game.is_complete():
+            break
+        if game.turn > 10:
+            break
+        print("GAME OVER!")
+        print_game(game)
+
+
+def turn_sim1(game):
+    if game.turn == 1:
+        game.send(0, "A", "B", 3)
+    elif game.turn == 3:
+        game.send(0, "A", "B", 15)
+
+
+def turn_sim2(game):
+    if game.turn == 1:
+        game.send(1, "B", "A", 10)
+    elif game.turn == 3:
+        game.send(0, "A", "B", 20)
+
+
+if __name__ == "__main__":
+    game_loop(turn_sim2)
+
