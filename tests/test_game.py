@@ -1,4 +1,4 @@
-"""Basic application flow"""
+"""Test basic application flow as a smoke test of sorts"""
 import model
 import view
 
@@ -44,6 +44,9 @@ def turn_sim2(game):
         game.send(0, "A", "B", 20)
 
 
-if __name__ == "__main__":
-    game_loop(turn_sim2)
+def test_game1():
+    game_loop(turn_sim1)
 
+
+def test_game1():
+    game_loop(turn_sim2)
