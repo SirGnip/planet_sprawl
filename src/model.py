@@ -131,9 +131,9 @@ class GameModel:
         assert ships <= src.ships
         fleet = Fleet(player, src, trg, ships, self.turn)
         src.ships -= fleet.ships
-        self.add_fleet(fleet)
+        self._add_fleet(fleet)
 
-    def add_fleet(self, fleet: Fleet):
+    def _add_fleet(self, fleet: Fleet):
         self.fleets.append(fleet)
 
     def is_complete(self):

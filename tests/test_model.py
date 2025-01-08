@@ -74,8 +74,7 @@ def test_game():
     game = _create_test_game()
     assert not game.is_complete()
     assert game.turn == 1
-    f = Fleet(game.players[0], game.grid.get_planet("A"), game.grid.get_planet("B"), 5, game.turn)
-    game.add_fleet(f)
+    game.send(0, "A", "B", 5)
     game.simulate()
     assert game.turn == 2
     assert not game.is_complete()
