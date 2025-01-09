@@ -26,8 +26,8 @@ def game_loop(turn_fn):
             break
         if game.turn > 10:
             break
-        print("GAME OVER!")
-        print_game(game)
+    game.events.add(game.turn, "GAME OVER!")
+    print_game(game)
 
 
 def turn_sim1(game):
@@ -48,5 +48,5 @@ def test_game1():
     game_loop(turn_sim1)
 
 
-def test_game1():
+def test_game2():
     game_loop(turn_sim2)

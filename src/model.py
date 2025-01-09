@@ -3,6 +3,9 @@ import random
 from dataclasses import dataclass, field
 
 
+TURN = int
+
+
 @dataclass(frozen=True)
 class Point:
     x: int
@@ -74,11 +77,24 @@ class Fleet:
     source: Planet
     destination: Planet
     ships: int
-    turn_launched: int
-    _arrival_turn: int = field(init=False)
+    turn_launched: TURN
+    _arrival_turn: TURN = field(init=False)
 
     def __post_init__(self):
         self._arrival_turn = self.turn_launched + math.ceil(self.source.pos.distance(self.destination.pos))
+
+
+@dataclass
+class EventLog:
+    """List of events that happend in the game that should be displayed to the user
+    Oldest event is at front of list"""
+    events: list[tuple[TURN, str]] = field(default_factory=list)
+
+    def length(self):
+        return len(self.events)
+
+    def add(self, turn: TURN, msg: str):
+        self.events.append((turn, msg))
 
 
 def name_generator(first_char):
@@ -101,6 +117,7 @@ class GameModel:
         self.grid = Grid(width, height)
         self.fleets = []
         self.turn = 1
+        self.events = EventLog()
 
     def create_planets(self, count):
         all_points = self.grid.get_all_points()
@@ -121,7 +138,7 @@ class GameModel:
             from_planet: str,
             to_planet: str,
             ships: int) -> None:
-        print(f"SEND: {player_idx} sends {ships} ships via {from_planet}-{to_planet}")
+        self.events.add(self.turn, f"SEND: {player_idx} sends {ships} ships via {from_planet}-{to_planet}")
         assert player_idx < len(self.players)
         src = self.grid.get_planet(from_planet)
         trg = self.grid.get_planet(to_planet)
@@ -145,24 +162,24 @@ class GameModel:
         self.turn += 1
 
         # production
-        # self.grid.produce()
+        self.grid.produce()
 
         # fleets
         new_fleets = []
         for fleet in self.fleets:
             if fleet._arrival_turn <= self.turn:
-                print(f"fleet hit {fleet}")
                 trg = fleet.destination
+                self.events.add(self.turn, f"fleet {fleet} encountered {trg.get_abbreviation()}")
                 if fleet.owner == trg.owner:
-                    print(f"REINFORCED {trg.get_abbbreviation()}")
+                    self.events.add(self.turn, f"REINFORCED {trg.get_abbreviation()}")
                     trg.ships += fleet.ships
                 else:
                     if fleet.ships > trg.ships:
-                        print(f"DEFEATED {trg.get_abbreviation()}")
+                        self.events.add(self.turn, f"DEFEATED {trg.get_abbreviation()}")
                         trg.owner = fleet.owner
                         trg.ships = fleet.ships - trg.ships
                     else:
-                        print(f"REPULSED {trg.get_abbreviation()}")
+                        self.events.add(self.turn, f"REPULSED {trg.get_abbreviation()}")
                         trg.ships -= fleet.ships
             else:
                 new_fleets.append(fleet)

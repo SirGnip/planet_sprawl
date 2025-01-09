@@ -51,5 +51,6 @@ def test_game_view():
     game.create_planets(10)
     txt = view.game_to_str(game)
     assert len(txt) > 1
-
-
+    game.send(0, "A", "B", 5)
+    event_lines = view.events_to_str(game.events)
+    assert len(event_lines) == 1

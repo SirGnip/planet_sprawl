@@ -78,3 +78,11 @@ def test_game():
     game.simulate()
     assert game.turn == 2
     assert not game.is_complete()
+
+
+def test_event_log():
+    game = _create_test_game()
+    game.simulate()
+    game.send(0, "A", "B", 5)
+    game.simulate()
+    assert game.events.length() == 1
