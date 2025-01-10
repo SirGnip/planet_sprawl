@@ -5,6 +5,9 @@ from dataclasses import dataclass, field
 
 TURN = int
 
+HOME_SHIPS = 20
+HOME_PRODUCTION = 10
+
 
 @dataclass(frozen=True)
 class Point:
@@ -125,11 +128,12 @@ class GameModel:
         for i in range(count):
             name = name_generator(chr(ord('a') + i))
             ships = random.randint(0, 10)
-            prod = random.randint(0, 10)
+            prod = random.randint(0, 5)
             owner = None
             if i < len(self.players):
                 owner = self.players[i]
-                ships = 50
+                ships = HOME_SHIPS
+                prod = HOME_PRODUCTION
             self.grid.add(Planet(owner, name, all_points[i], ships, prod))
 
     def send(
