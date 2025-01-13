@@ -2,21 +2,24 @@ import model
 import view
 
 
+def get_input(msg, default):
+    val = input(msg + f"({default})")
+    if val.strip() == "":
+        val = default
+    return val
+
+
 def make_game():
     if True:
-        planet_in = input("Enter how many planets: ")
-        planet_count = int(planet_in) if planet_in.strip() != "" else 10
-        width_in = input("Enter horizontal width of map: ")
-        width = int(width_in) if width_in.strip() != "" else 10
-        height_in = input("Enter vertical height of map: ")
-        height = int(height_in) if height_in.strip() != "" else 10
+        planet_count = get_input("Enter how many planets: ", 10)
+        width = get_input("Enter horizontal width of map: ", 4)
+        height = get_input("Enter vertical height of map: ", 4)
         names = []
         while True:
             name = input("Enter name (empty to end): ")
             if name.strip() == "":
                 break
             names.append(name)
-
     else:
         names = ['foo', 'bar']
         width = 10
@@ -27,9 +30,9 @@ def make_game():
     game.create_planets(planet_count)
     return game
 
+
 def print_game(game):
-    print()
-    print()
+    [print() for _ in range(5)]
     print("====== Turn {} ======".format(game.turn))
     print("\n".join(view.game_to_str(game)))
 

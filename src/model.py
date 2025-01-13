@@ -7,6 +7,10 @@ TURN = int
 
 HOME_SHIPS = 20
 HOME_PRODUCTION = 10
+NEUTRAL_SHIP_MIN = 0
+NEUTRAL_SHIP_MAX = 5
+NEUTRAL_PRODUCTION_MIN = 0
+NEUTRAL_PRODUCTION_MAX = 8
 
 
 @dataclass(frozen=True)
@@ -127,8 +131,8 @@ class GameModel:
         random.shuffle(all_points)
         for i in range(count):
             name = name_generator(chr(ord('a') + i))
-            ships = random.randint(0, 10)
-            prod = random.randint(0, 5)
+            ships = random.randint(NEUTRAL_SHIP_MIN, NEUTRAL_SHIP_MAX)
+            prod = random.randint(NEUTRAL_PRODUCTION_MIN, NEUTRAL_PRODUCTION_MAX)
             owner = None
             if i < len(self.players):
                 owner = self.players[i]
@@ -142,7 +146,6 @@ class GameModel:
             from_planet: str,
             to_planet: str,
             ships: int) -> None:
-        self.events.add(self.turn, f"SEND: {player_idx} sends {ships} ships via {from_planet}-{to_planet}")
         assert player_idx < len(self.players)
         src = self.grid.get_planet(from_planet)
         trg = self.grid.get_planet(to_planet)
@@ -173,7 +176,6 @@ class GameModel:
         for fleet in self.fleets:
             if fleet._arrival_turn <= self.turn:
                 trg = fleet.destination
-                self.events.add(self.turn, f"fleet {fleet} encountered {trg.get_abbreviation()}")
                 if fleet.owner == trg.owner:
                     self.events.add(self.turn, f"REINFORCED {trg.get_abbreviation()}")
                     trg.ships += fleet.ships

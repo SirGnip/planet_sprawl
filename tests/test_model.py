@@ -85,4 +85,4 @@ def test_event_log():
     game.simulate()
     game.send(0, "A", "B", 5)
     game.simulate()
-    assert game.events.length() == 1
+    assert game.events.length() == 0
