@@ -3,7 +3,7 @@ import view
 
 
 def get_input(msg, default):
-    val = input(msg + f"({default})")
+    val = input(msg + f"({default}) ")
     if val.strip() == "":
         val = default
     return val
@@ -14,9 +14,13 @@ def make_game():
         planet_count = get_input("Enter how many planets: ", 10)
         width = get_input("Enter horizontal width of map: ", 4)
         height = get_input("Enter vertical height of map: ", 4)
+        default_names = ["foo", "buzz"]
         names = []
         while True:
-            name = input("Enter name (empty to end): ")
+            if len(default_names) > 0:
+                name = get_input("Enter name: ", default_names.pop(0))
+            else:
+                name = input("Enter name (empty to end): ")
             if name.strip() == "":
                 break
             names.append(name)
