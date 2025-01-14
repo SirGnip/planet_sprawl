@@ -1,3 +1,10 @@
+"""
+NOTE: It feels like the GameModel.parse_cli_command() method and InvalidPlayerInput
+exception are pollution the encapsulation of the model by letting UI logic "leak" into it.
+At least it doesn't directly depend on anything UI related.
+"""
+
+
 import math
 import random
 from dataclasses import dataclass, field
@@ -11,6 +18,10 @@ NEUTRAL_SHIP_MIN = 0
 NEUTRAL_SHIP_MAX = 5
 NEUTRAL_PRODUCTION_MIN = 0
 NEUTRAL_PRODUCTION_MAX = 8
+
+
+class InvalidPlayerInput(Exception):
+    pass
 
 
 @dataclass(frozen=True)
@@ -53,11 +64,11 @@ class Grid:
         self.planets.append(planet)
 
     def get(self, x, y) -> Planet:
-        assert 0 <= x < self.width and 0 <= y < self.height
+        assert 0 <= x < self.width and 0 <= y < self.height, f"Invalid coordinates: {x}, {y} outside of width & height: {self.width} {self.height}"
         planets = [p for p in self.planets if p.pos.x == x and p.pos.y == y]
         if len(planets) == 0:
             raise Exception(f"No planet at {x}, {y}")
-        assert len(planets) == 1
+        assert len(planets) == 1, f"Did not find one and only one planet for {x}, {y}"
         return planets[0]
 
     def get_planet(self, letter) -> Planet|None:
@@ -140,19 +151,32 @@ class GameModel:
                 prod = HOME_PRODUCTION
             self.grid.add(Planet(owner, name, all_points[i], ships, prod))
 
+    def parse_cli_command(self, player_input) -> tuple[int, str, str, int]:
+        tokens = player_input.strip().split()
+        if len(tokens) != 4:
+            raise InvalidPlayerInput("Expected 4 items in input")
+
+        try:
+            player_idx, planet_from, planet_to, ships = tokens
+            player_idx = int(player_idx)
+            ships = int(ships)
+            return player_idx, planet_from.upper(), planet_to.upper(), ships
+        except Exception as exc:
+            raise InvalidPlayerInput(exc)
+
     def send(
             self,
             player_idx: int,
             from_planet: str,
             to_planet: str,
             ships: int) -> None:
-        assert player_idx < len(self.players)
+        assert player_idx < len(self.players), f"Invalid player index: {player_idx}"
         src = self.grid.get_planet(from_planet)
         trg = self.grid.get_planet(to_planet)
 
         player = self.players[player_idx]
-        assert player == src.owner
-        assert ships <= src.ships
+        assert player == src.owner, f"{player.name} does not own {src.get_abbreviation()}"
+        assert ships <= src.ships, f"{player.name} does not have {ships} ships on {src.get_abbreviation()}"
         fleet = Fleet(player, src, trg, ships, self.turn)
         src.ships -= fleet.ships
         self._add_fleet(fleet)
@@ -162,6 +186,9 @@ class GameModel:
 
     def is_complete(self):
         return self.grid.is_complete()
+
+    def add_event(self, msg: str):
+        self.events.add(self.turn, msg)
 
     def simulate(self):
         """Move fleets, resolve conflicts, handle planet production"""
@@ -177,15 +204,15 @@ class GameModel:
             if fleet._arrival_turn <= self.turn:
                 trg = fleet.destination
                 if fleet.owner == trg.owner:
-                    self.events.add(self.turn, f"REINFORCED {trg.get_abbreviation()}")
+                    self.add_event(f"REINFORCED {trg.get_abbreviation()}")
                     trg.ships += fleet.ships
                 else:
                     if fleet.ships > trg.ships:
-                        self.events.add(self.turn, f"DEFEATED {trg.get_abbreviation()}")
+                        self.add_event(f"DEFEATED {trg.get_abbreviation()}")
                         trg.owner = fleet.owner
                         trg.ships = fleet.ships - trg.ships
                     else:
-                        self.events.add(self.turn, f"REPULSED {trg.get_abbreviation()}")
+                        self.add_event(f"REPULSED {trg.get_abbreviation()}")
                         trg.ships -= fleet.ships
             else:
                 new_fleets.append(fleet)

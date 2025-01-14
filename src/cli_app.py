@@ -1,6 +1,8 @@
 import model
 import view
 
+DEBUG = True
+
 
 def get_input(msg, default):
     val = input(msg + f"({default}) ")
@@ -10,7 +12,7 @@ def get_input(msg, default):
 
 
 def make_game():
-    if True:
+    if not DEBUG:
         planet_count = get_input("Enter how many planets: ", 10)
         width = get_input("Enter horizontal width of map: ", 4)
         height = get_input("Enter vertical height of map: ", 4)
@@ -25,10 +27,10 @@ def make_game():
                 break
             names.append(name)
     else:
-        names = ['foo', 'bar']
-        width = 10
-        height = 10
+        names = ["foo", "buzz"]
         planet_count = 10
+        width = 4
+        height = 4
 
     game = model.GameModel(names, width, height)
     game.create_planets(planet_count)
@@ -39,6 +41,8 @@ def print_game(game):
     [print() for _ in range(5)]
     print("====== Turn {} ======".format(game.turn))
     print("\n".join(view.game_to_str(game)))
+
+
 
 
 def main():
@@ -52,11 +56,11 @@ def main():
             elif turn.strip() == "q":
                 break
             else:
-                tokens = turn.strip().split()
-                player_idx, planet_from, planet_to, ships = tokens
-                player_idx = int(player_idx)
-                ships = int(ships)
-                game.send(player_idx, planet_from, planet_to, ships)
+                try:
+                    player_idx, planet_from, planet_to, ships = game.parse_cli_command(turn)
+                    game.send(player_idx, planet_from, planet_to, ships)
+                except Exception as exc:
+                    print(f"Invalid input: {exc.__class__.__name__}: {exc}")
         game.simulate()
         if game.is_complete() or turn.strip() == "q":
             break
