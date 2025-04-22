@@ -50,6 +50,6 @@ def test_game_view():
     game = GameModel(['Foo', 'Bar'], 6, 6)
     game.create_planets(10)
     txt = view.game_to_str(game)
-    game.send(0, "A", "B", 5)
+    game.send(1, "A", "B", 5)
     event_lines = view.events_to_str(game.events, 1)
     assert len(event_lines) == 0

@@ -36,9 +36,10 @@ def test_grid():
     assert g.height == 5
     assert g.planets == []
 
-    planet1 = Planet(None, "Altair", Point(1, 1), 5, 2)
+    neutral = Player("-", is_neutral=True)
+    planet1 = Planet(neutral, "Altair", Point(1, 1), 5, 2)
     g.add(planet1)
-    planet2 = Planet(None, "Beta", Point(2, 2), 10, 5)
+    planet2 = Planet(neutral, "Beta", Point(2, 2), 10, 5)
     g.add(planet2)
     assert len(g.planets) == 2
     assert g.planets[0] == planet1
@@ -64,8 +65,8 @@ def test_fleet():
 
 def _create_test_game() -> GameModel:
     game = GameModel(["Foo", "Bar"], 4, 4)
-    game.grid.add(Planet(game.players[0], 'Able', Point(0, 0), 10, 1))
-    game.grid.add(Planet(game.players[1], 'Beta', Point(3, 0), 10, 1))
+    game.grid.add(Planet(game.players[1], 'Able', Point(0, 0), 10, 1))
+    game.grid.add(Planet(game.players[2], 'Beta', Point(3, 0), 10, 1))
     return game
 
 
@@ -74,7 +75,7 @@ def test_game():
     game = _create_test_game()
     assert not game.is_complete()
     assert game.turn == 1
-    game.send(0, "A", "B", 5)
+    game.send(1, "A", "B", 5)
     game.simulate()
     assert game.turn == 2
     assert not game.is_complete()
@@ -83,6 +84,6 @@ def test_game():
 def test_event_log():
     game = _create_test_game()
     game.simulate()
-    game.send(0, "A", "B", 5)
+    game.send(1, "A", "B", 5)
     game.simulate()
     assert game.events.length() == 0

@@ -18,6 +18,7 @@ NEUTRAL_SHIP_MIN = 0
 NEUTRAL_SHIP_MAX = 5
 NEUTRAL_PRODUCTION_MIN = 0
 NEUTRAL_PRODUCTION_MAX = 8
+NEUTRAL_NAME = "-"
 
 
 class InvalidPlayerInput(Exception):
@@ -39,11 +40,15 @@ class Point:
 @dataclass(frozen=True)
 class Player:
     name: str
+    is_neutral: bool = False
+
+    def __str__(self):
+        return self.name
 
 
 @dataclass
 class Planet:
-    owner: Player | None
+    owner: Player
     name: str
     pos: Point
     ships: int
@@ -81,12 +86,13 @@ class Grid:
         return [Point(x, y) for x in range(self.width) for y in range(self.height)]
 
     def is_complete(self) -> bool:
-        players = {p.owner for p in self.planets if p.owner is not None}
+        players = {p.owner for p in self.planets if not p.owner.is_neutral}
         return len(players) < 2
 
     def produce(self) -> None:
         for p in self.planets:
-            p.ships += p.production
+            if not p.owner.is_neutral:
+                p.ships += p.production
 
 
 @dataclass
@@ -132,6 +138,8 @@ class GameModel:
     """Top-level model that holds all individual models"""
     def __init__(self, player_names: list[str], width: int, height: int):
         self.players = [Player(name) for name in player_names]
+        self.neutral_player = Player(NEUTRAL_NAME, is_neutral=True)
+        self.players.insert(0, self.neutral_player)
         self.grid = Grid(width, height)
         self.fleets = []
         self.turn = 1
@@ -144,9 +152,11 @@ class GameModel:
             name = name_generator(chr(ord('a') + i))
             ships = random.randint(NEUTRAL_SHIP_MIN, NEUTRAL_SHIP_MAX)
             prod = random.randint(NEUTRAL_PRODUCTION_MIN, NEUTRAL_PRODUCTION_MAX)
-            owner = None
-            if i < len(self.players):
-                owner = self.players[i]
+            owner = self.neutral_player
+            active_players = [p for p in self.players if not p.is_neutral]
+            # Create starting worlds
+            if i < len(active_players):
+                owner = active_players[i]
                 ships = HOME_SHIPS
                 prod = HOME_PRODUCTION
             self.grid.add(Planet(owner, name, all_points[i], ships, prod))
@@ -176,7 +186,7 @@ class GameModel:
 
         player = self.players[player_idx]
         assert player == src.owner, f"{player.name} does not own {src.get_abbreviation()}"
-        assert ships <= src.ships, f"{player.name} does not have {ships} ships on {src.get_abbreviation()}"
+        assert ships <= src.ships, f"{player.name} does not have {ships} ships on {src.get_abbreviation()}. There are {src.ships}."
         fleet = Fleet(player, src, trg, ships, self.turn)
         src.ships -= fleet.ships
         self._add_fleet(fleet)
@@ -204,15 +214,15 @@ class GameModel:
             if fleet._arrival_turn <= self.turn:
                 trg = fleet.destination
                 if fleet.owner == trg.owner:
-                    self.add_event(f"REINFORCED {trg.get_abbreviation()}")
+                    self.add_event(f"{fleet.owner.name} REINFORCED {trg.get_abbreviation()} with {fleet.ships} ships")
                     trg.ships += fleet.ships
                 else:
                     if fleet.ships > trg.ships:
-                        self.add_event(f"DEFEATED {trg.get_abbreviation()}")
+                        self.add_event(f"{fleet.owner.name} DEFEATED {trg.owner.name} on {trg.get_abbreviation()} using {fleet.ships} ships")
                         trg.owner = fleet.owner
                         trg.ships = fleet.ships - trg.ships
                     else:
-                        self.add_event(f"REPULSED {trg.get_abbreviation()}")
+                        self.add_event(f"{trg.owner.name} DEFENDED {fleet.owner.name}'s {fleet.ships} ship attack on {trg.get_abbreviation()}")
                         trg.ships -= fleet.ships
             else:
                 new_fleets.append(fleet)
