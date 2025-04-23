@@ -161,18 +161,16 @@ class GameModel:
                 prod = HOME_PRODUCTION
             self.grid.add(Planet(owner, name, all_points[i], ships, prod))
 
-    def parse_cli_command(self, player_input) -> tuple[int, str, str, int]:
+    def parse_cli_command(self, player_input) -> tuple[str, str, int]:
         tokens = player_input.strip().split()
-        if len(tokens) != 4:
-            raise InvalidPlayerInput("Expected 4 items in input")
-
+        if len(tokens) != 3:
+            raise InvalidPlayerInput("Expected 3 items in input: FROM TO SHIPS")
+        planet_from, planet_to, ships = tokens
         try:
-            player_idx, planet_from, planet_to, ships = tokens
-            player_idx = int(player_idx)
             ships = int(ships)
-            return player_idx, planet_from.upper(), planet_to.upper(), ships
         except Exception as exc:
-            raise InvalidPlayerInput(exc)
+            raise InvalidPlayerInput(f"Invalid ship count: {exc}")
+        return planet_from.upper(), planet_to.upper(), ships
 
     def send(
             self,

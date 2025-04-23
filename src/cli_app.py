@@ -43,33 +43,31 @@ def print_game(game):
     print("\n".join(view.game_to_str(game)))
 
 
-
-
 def main():
     game = make_game()
     while not game.is_complete():
         print_game(game)
-        while True:
-            turn = input("Enter moves: ")
-            if turn.strip() == "":
-                break
-            elif turn.strip() == "q":
-                break
-            else:
+        for player_idx, player in enumerate(game.players):
+            if player.is_neutral:
+                continue
+            print(f"Player {player_idx} ({player.name})'s turn:")
+            while True:
+                turn = input(f"  Enter move for {player.name} (FROM TO SHIPS or empty to end, q to quit): ")
+                if turn.strip() == "":
+                    break
+                if turn.strip() == "q":
+                    game.events.add(game.turn, "GAME OVER!")
+                    print_game(game)
+                    return
                 try:
-                    player_idx, planet_from, planet_to, ships = game.parse_cli_command(turn)
+                    planet_from, planet_to, ships = game.parse_cli_command(turn)
                     game.send(player_idx, planet_from, planet_to, ships)
                 except Exception as exc:
-                    print(f"Invalid input: {exc.__class__.__name__}: {exc}")
+                    print(f"  Invalid input: {exc.__class__.__name__}: {exc}")
         game.simulate()
-        if game.is_complete() or turn.strip() == "q":
-            break
     game.events.add(game.turn, "GAME OVER!")
     print_game(game)
 
 
 if __name__ == '__main__':
     main()
-
-
-
