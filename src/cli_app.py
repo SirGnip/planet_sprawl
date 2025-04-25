@@ -43,30 +43,41 @@ def print_game(game):
     print("\n".join(view.game_to_str(game)))
 
 
-def main():
-    game = make_game()
+def handle_player_turn(game, player_idx, player):
+    if player.is_neutral:
+        return False
+    print(f"Player {player_idx} ({player.name})'s turn:")
+    while True:
+        turn = input(f"  Enter move for {player.name} (FROM TO SHIPS or empty to end, q to quit): ")
+        if turn.strip() == "":
+            break
+        if turn.strip() == "q":
+            game.events.add(game.turn, "GAME OVER!")
+            print_game(game)
+            return True
+        try:
+            planet_from, planet_to, ships = game.parse_cli_command(turn)
+            game.send(player_idx, planet_from, planet_to, ships)
+        except Exception as exc:
+            print(f"  Invalid input: {exc.__class__.__name__}: {exc}")
+    return False
+
+
+def run_game_loop(game):
     while not game.is_complete():
         print_game(game)
         for player_idx, player in enumerate(game.players):
-            if player.is_neutral:
-                continue
-            print(f"Player {player_idx} ({player.name})'s turn:")
-            while True:
-                turn = input(f"  Enter move for {player.name} (FROM TO SHIPS or empty to end, q to quit): ")
-                if turn.strip() == "":
-                    break
-                if turn.strip() == "q":
-                    game.events.add(game.turn, "GAME OVER!")
-                    print_game(game)
-                    return
-                try:
-                    planet_from, planet_to, ships = game.parse_cli_command(turn)
-                    game.send(player_idx, planet_from, planet_to, ships)
-                except Exception as exc:
-                    print(f"  Invalid input: {exc.__class__.__name__}: {exc}")
+            if handle_player_turn(game, player_idx, player):
+                print_game(game)
+                return
         game.simulate()
     game.events.add(game.turn, "GAME OVER!")
     print_game(game)
+
+
+def main():
+    game = make_game()
+    run_game_loop(game)
 
 
 if __name__ == '__main__':
