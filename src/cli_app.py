@@ -11,14 +11,22 @@ class PlayerEventLoop:
     def __init__(self, main_coro):
         self.loop = asyncio.get_event_loop()
         self.task = self.loop.create_task(main_coro)
+        self.is_done = False
 
     def tick(self):
         if self.task.done():
-            self.loop.close()
-            return
-        self.loop.call_soon(self.loop.stop)
-        self.loop.run_forever()
-        time.sleep(0.5)
+            if not self.is_done:
+                self.is_done = True
+                self.loop.close()
+                exc = self.task.exception()
+                if exc is not None:
+                    raise exc
+        else:
+            self.loop.call_soon(self.loop.stop)
+            self.loop.run_forever()
+
+        time.sleep(0.01)
+
 
 
 def get_input(msg, default):
@@ -69,14 +77,10 @@ def print_game(game):
 
 
 async def player_main(game, players):
-    try:
-        # create tasks for all players
-        tasks = [asyncio.create_task(p.make_move(game)) for p in players]
-        print(f'got {len(tasks)} tasks')
-        while True:
-            await asyncio.sleep(0)
-    except Exception as exc:
-        print(f"Error in player_main: {exc.__class__.__name__}: {exc}")
+    tasks = [asyncio.create_task(p.make_move(game)) for p in players]
+    print(f'got {len(tasks)} tasks')
+    await asyncio.gather(*tasks)  # Awaiting tasks allows exceptions to be caught and reraised by the custom event loop
+    print('main is done')
 
 
 def run_game_loop(game, players):
