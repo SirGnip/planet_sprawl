@@ -10,10 +10,26 @@ def grid_to_str(g: model.Grid) -> list[str]:
 
 def planets_to_str(g: model.Grid) -> list[str]:
     txt = []
+
+    # planets
     txt.append("P Ship Prd Ownr")
     txt.append("---------------")
     for p in g.planets:
         txt.append(f"{p.get_abbreviation()} {p.ships:4d} {p.production:3d} {p.owner.name[:4] if p.owner else '-'}")
+
+    # # production (for debugging)
+    # prod_by_player = {}
+    # for p in g.planets:
+    #     if p.owner not in prod_by_player:
+    #         prod_by_player[p.owner] = 0
+    #     prod_by_player[p.owner] += p.production
+    # txt.append("---------------------")
+    # prod_items = ["Production:"]
+    # for player, prod in prod_by_player.items():
+    #     if not player.is_neutral:
+    #         prod_items.append(f"{player.name}:{prod}")
+    # txt.append("  ".join(prod_items))
+
     return txt
 
 

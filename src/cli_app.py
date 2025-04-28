@@ -1,7 +1,24 @@
+import time
+import asyncio
 import model
 import view
+import player
 
 DEBUG = True
+
+
+class PlayerEventLoop:
+    def __init__(self, main_coro):
+        self.loop = asyncio.get_event_loop()
+        self.task = self.loop.create_task(main_coro)
+
+    def tick(self):
+        if self.task.done():
+            self.loop.close()
+            return
+        self.loop.call_soon(self.loop.stop)
+        self.loop.run_forever()
+        time.sleep(0.5)
 
 
 def get_input(msg, default):
@@ -26,15 +43,23 @@ def make_game():
             if name.strip() == "":
                 break
             names.append(name)
+        players = []  # HACK
     else:
-        names = ["foo", "buzz"]
+        players = [
+            # player.ManualPlayerController(1, "Humn"),
+            player.AiPlayerControllerRandom(1, "Alph"),
+            player.AiPlayerControllerRandom(2, "Beta"),
+            player.AiPlayerControllerRandom(3, "Cato"),
+            player.AiPlayerControllerRandom(4, "Dogo"),
+        ]
+        names = [p.get_name() for p in players]
         planet_count = 10
-        width = 4
-        height = 4
+        width = 5
+        height = 5
 
     game = model.GameModel(names, width, height)
     game.create_planets(planet_count)
-    return game
+    return game, players
 
 
 def print_game(game):
@@ -43,41 +68,30 @@ def print_game(game):
     print("\n".join(view.game_to_str(game)))
 
 
-def handle_player_turn(game, player_idx, player):
-    if player.is_neutral:
-        return False
-    print(f"Player {player_idx} ({player.name})'s turn:")
-    while True:
-        turn = input(f"  Enter move for {player.name} (FROM TO SHIPS or empty to end, q to quit): ")
-        if turn.strip() == "":
-            break
-        if turn.strip() == "q":
-            game.events.add(game.turn, "GAME OVER!")
-            print_game(game)
-            return True
-        try:
-            planet_from, planet_to, ships = game.parse_cli_command(turn)
-            game.send(player_idx, planet_from, planet_to, ships)
-        except Exception as exc:
-            print(f"  Invalid input: {exc.__class__.__name__}: {exc}")
-    return False
+async def player_main(game, players):
+    try:
+        # create tasks for all players
+        tasks = [asyncio.create_task(p.make_move(game)) for p in players]
+        print(f'got {len(tasks)} tasks')
+        while True:
+            await asyncio.sleep(0)
+    except Exception as exc:
+        print(f"Error in player_main: {exc.__class__.__name__}: {exc}")
 
 
-def run_game_loop(game):
+def run_game_loop(game, players):
+    event_loop = PlayerEventLoop(player_main(game, players))
     while not game.is_complete():
         print_game(game)
-        for player_idx, player in enumerate(game.players):
-            if handle_player_turn(game, player_idx, player):
-                print_game(game)
-                return
+        event_loop.tick()
         game.simulate()
     game.events.add(game.turn, "GAME OVER!")
     print_game(game)
 
 
 def main():
-    game = make_game()
-    run_game_loop(game)
+    game, players = make_game()
+    run_game_loop(game, players)
 
 
 if __name__ == '__main__':

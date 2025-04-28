@@ -85,10 +85,6 @@ class Grid:
     def get_all_points(self):
         return [Point(x, y) for x in range(self.width) for y in range(self.height)]
 
-    def is_complete(self) -> bool:
-        players = {p.owner for p in self.planets if not p.owner.is_neutral}
-        return len(players) < 2
-
     def produce(self) -> None:
         for p in self.planets:
             if not p.owner.is_neutral:
@@ -187,13 +183,21 @@ class GameModel:
         assert ships <= src.ships, f"{player.name} does not have {ships} ships on {src.get_abbreviation()}. There are {src.ships}."
         fleet = Fleet(player, src, trg, ships, self.turn)
         src.ships -= fleet.ships
+        print('SEND', fleet)
         self._add_fleet(fleet)
 
     def _add_fleet(self, fleet: Fleet):
         self.fleets.append(fleet)
 
     def is_complete(self):
-        return self.grid.is_complete()
+        players = {p.owner for p in self.grid.planets if not p.owner.is_neutral}
+        if len(players) > 1:
+            return False
+        last_player = players.pop()
+        print(f'complete: {last_player}')
+        for f in self.fleets:
+            print(f'  fleet: {f}')
+        return all(fleet.owner == last_player for fleet in self.fleets)
 
     def add_event(self, msg: str):
         self.events.add(self.turn, msg)

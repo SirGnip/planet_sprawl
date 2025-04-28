@@ -44,7 +44,6 @@ def test_grid():
     assert len(g.planets) == 2
     assert g.planets[0] == planet1
     assert g.planets[1] == planet2
-    assert g.is_complete()
     assert g.get(2, 2) == planet2
     with pytest.raises(Exception):
         g.get(0, 0)
