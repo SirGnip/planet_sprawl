@@ -55,10 +55,11 @@ def make_game():
     else:
         players = [
             # player.ManualPlayerController(1, "Humn"),
-            player.AiPlayerControllerRandom(1, "Alph"),
-            player.AiPlayerControllerRandom(2, "Beta"),
-            player.AiPlayerControllerRandom(3, "Cato"),
-            player.AiPlayerControllerRandom(4, "Dogo"),
+            # player.AiPlayerControllerRandom(1, "Rand"),
+            player.AiPlayerControllerSpread(1, "Alph"),
+            player.AiPlayerControllerSpread(2, "Beta"),
+            player.AiPlayerControllerSpread(3, "Cato"),
+            player.AiPlayerControllerRandom(4, "Doge"),
         ]
         names = [p.get_name() for p in players]
         planet_count = 10

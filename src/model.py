@@ -220,7 +220,7 @@ class GameModel:
                     trg.ships += fleet.ships
                 else:
                     if fleet.ships > trg.ships:
-                        self.add_event(f"{fleet.owner.name} DEFEATED {trg.owner.name} on {trg.get_abbreviation()} using {fleet.ships} ships")
+                        self.add_event(f"{fleet.owner.name} CONQUERED {trg.owner.name} on {trg.get_abbreviation()} using {fleet.ships} ships")
                         trg.owner = fleet.owner
                         trg.ships = fleet.ships - trg.ships
                     else:

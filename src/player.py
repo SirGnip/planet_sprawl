@@ -37,7 +37,7 @@ class AiPlayerController(PlayerController):
         super().__init__(idx, name)
 
 
-class AiPlayerControllerMinimal(PlayerController):
+class AiPlayerControllerMinimal(AiPlayerController):
     """A minimal player. Not very useful."""
     async def make_move(self, game: model.GameModel):
         game.send(self.idx, "A", "C", 10)
@@ -47,7 +47,7 @@ class AiPlayerControllerMinimal(PlayerController):
             await asyncio.sleep(0)
 
 
-class AiPlayerControllerRandom(PlayerController):
+class AiPlayerControllerRandom(AiPlayerController):
     """Randomly select 'from' and 'to' planets. This simple logic can 'win'."""
     async def make_move(self, game: model.GameModel):
         while True:
@@ -60,3 +60,29 @@ class AiPlayerControllerRandom(PlayerController):
                 if ships > 0:
                     game.send(self.idx, from_planet.get_abbreviation(), to_planet.get_abbreviation(), ships)
             await asyncio.sleep(0)
+
+class AiPlayerControllerSpread(AiPlayerController):
+    """Attack planet nearest to the planets I own."""
+    async def make_move(self, game: model.GameModel):
+        while True:
+            # attack
+            my_planets = [p for p in game.grid.planets if p.owner.name == self.get_name()]
+            enemy_planets = [p for p in game.grid.planets if p.owner.name != self.get_name()]
+            if len(my_planets) > 0 and len(enemy_planets) > 0:
+                closest_enemy = min(enemy_planets, key=lambda e: min(e.pos.distance(p.pos) for p in my_planets))
+                closest_my_planet = min(my_planets, key=lambda p: closest_enemy.pos.distance(p.pos))
+                ships = int(closest_my_planet.ships * 0.8)
+                if ships > 0:
+                    print(f"*** {self.name} Attack-Sending {ships} ships from {closest_my_planet.get_abbreviation()} to {closest_enemy.get_abbreviation()}")
+                    game.send(self.idx, closest_my_planet.get_abbreviation(), closest_enemy.get_abbreviation(), ships)
+
+                # fortify - from planet with most ships to planet that is attacking
+                most_ships_planet = max(my_planets, key=lambda p: p.ships)
+                ships = int(most_ships_planet.ships * 0.8)
+                if most_ships_planet.ships > 10:
+                    print(f"*** {self.name} Fortify-Sending {ships} ships from {most_ships_planet.get_abbreviation()} to {closest_my_planet.get_abbreviation()}")
+                    game.send(self.idx, most_ships_planet.get_abbreviation(), closest_my_planet.get_abbreviation(), ships)
+
+            await asyncio.sleep(0)
+
+
