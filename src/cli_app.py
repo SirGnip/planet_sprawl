@@ -41,9 +41,9 @@ def make_game(planet_count, width, height, player_configs):
         ptype = conf['type'].lower()
         if ptype == 'human':
             players.append(player.ManualPlayerController(idx, conf['name']))
-        elif ptype == 'airandom':
+        elif ptype == 'ai_random':
             players.append(player.AiPlayerControllerRandom(idx, conf['name']))
-        elif ptype == 'aispread':
+        elif ptype == 'ai_spread':
             players.append(player.AiPlayerControllerSpread(idx, conf['name']))
         else:
             raise ValueError(f"Unknown player type: {conf['type']}")
@@ -64,7 +64,7 @@ def parse_cli_args_and_start_game():
     parser.add_argument('--width', type=int, default=5, help='Grid width')
     parser.add_argument('--height', type=int, default=5, help='Grid height')
     parser.add_argument('--player', action='append', nargs=2, metavar=('TYPE', 'NAME'),
-                        help='Add a player: TYPE NAME (TYPE: human, AIRandom, AISpread)')
+                        help='Add a player: TYPE NAME (TYPE: human, ai_random, ai_spread)')
     args = parser.parse_args()
 
     if not args.player:
@@ -83,20 +83,12 @@ def main_cli():
         planet_count = int(get_input("Enter how many planets: ", 10))
         width = int(get_input("Enter horizontal width of map: ", 4))
         height = int(get_input("Enter vertical height of map: ", 4))
-        default_names = ["foo", "buzz"]
-        names = []
-        while True:
-            if len(default_names) > 0:
-                name = get_input("Enter name: ", default_names.pop(0))
-            else:
-                name = input("Enter name (empty to end): ")
-            if name.strip() == "":
-                break
-            names.append(name)
+        num_players = int(get_input("How many players? ", 2))
         player_configs = []
-        for n in names:
-            ptype = get_input(f"Enter type for {n} (human/AIRandom/AISpread): ", "human")
-            player_configs.append({'type': ptype, 'name': n})
+        for i in range(num_players):
+            ptype = get_input(f"Enter player {i+1} type (human/ai_random/ai_spread): ", "human")
+            name = get_input(f"Enter name for {ptype} player {i+1}: ", f"p{i+1}")
+            player_configs.append({'type': ptype, 'name': name})
         run_game(planet_count, width, height, player_configs)
 
 
