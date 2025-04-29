@@ -4,6 +4,7 @@ import model
 import view
 import player
 import argparse
+from player import PlayerExitException
 
 
 class PlayerEventLoop:
@@ -23,7 +24,6 @@ class PlayerEventLoop:
         else:
             self.loop.call_soon(self.loop.stop)
             self.loop.run_forever()
-
         time.sleep(0.01)
 
 
@@ -108,7 +108,11 @@ def run_game_loop(game, players):
     event_loop = PlayerEventLoop(player_main(game, players))
     while not game.is_complete():
         print_game(game)
-        event_loop.tick()
+        try:
+            event_loop.tick()
+        except PlayerExitException as e:
+            print(f"\nGame exited by player: Exception: {e}")
+            break
         game.simulate()
     game.events.add(game.turn, "GAME OVER!")
     print_game(game)
@@ -127,4 +131,3 @@ def batch_of_games():
 if __name__ == '__main__':
     main_cli()
     # batch_of_games()
-

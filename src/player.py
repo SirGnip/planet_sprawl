@@ -2,6 +2,10 @@ import random
 import asyncio
 import model
 
+class PlayerExitException(Exception):
+    """Raised when a manual player exits the game interactively."""
+    # BUG: The custom async loop is somehow delaying the catching of exceptions. So, a game exit is delayed a couple turns.
+    pass
 
 class PlayerController:
     def __init__(self, idx: int, name: str):
@@ -14,7 +18,6 @@ class PlayerController:
     async def make_move(self, game: model.GameModel):
         pass
 
-
 class ManualPlayerController(PlayerController):
     def __init__(self, idx: int, name: str):
         super().__init__(idx, name)
@@ -22,7 +25,10 @@ class ManualPlayerController(PlayerController):
     async def make_move(self, game: model.GameModel):
         while True:  # Loop for entire game
             while True:  # Loop to get multiple moves
-                turn = input(f"  Enter move for {self.get_name()} {self.idx} (<FROM> <TO> <SHIPS> or empty to end): ")
+                turn = input(f"  Enter move for {self.get_name()} #{self.idx} (<FROM> <TO> <SHIPS>, empty to end turn, or 'quit' to quit game completely): ")
+                if turn.strip().lower() == 'quit':
+                    print(f"Player {self.get_name()} ({self.idx}) exited the game.")
+                    raise PlayerExitException(f"Player {self.get_name()} exited the game.")
                 if turn.strip() == "":
                     break  # done entering moves for this turn
                 try:
@@ -36,7 +42,6 @@ class AiPlayerController(PlayerController):
     def __init__(self, idx: int, name: str):
         super().__init__(idx, name)
 
-
 class AiPlayerControllerMinimal(AiPlayerController):
     """A minimal player. Not very useful."""
     async def make_move(self, game: model.GameModel):
@@ -45,7 +50,6 @@ class AiPlayerControllerMinimal(AiPlayerController):
         while True:
             game.send(self.idx, "A", "C", 5)
             await asyncio.sleep(0)
-
 
 class AiPlayerControllerRandom(AiPlayerController):
     """Randomly select 'from' and 'to' planets. This simple logic can 'win'."""
@@ -84,5 +88,3 @@ class AiPlayerControllerSpread(AiPlayerController):
                     game.send(self.idx, most_ships_planet.get_abbreviation(), closest_my_planet.get_abbreviation(), ships)
 
             await asyncio.sleep(0)
-
-
