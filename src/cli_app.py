@@ -5,8 +5,6 @@ import view
 import player
 import argparse
 
-DEBUG = True
-
 
 class PlayerEventLoop:
     def __init__(self, main_coro):
@@ -27,7 +25,6 @@ class PlayerEventLoop:
             self.loop.run_forever()
 
         time.sleep(0.01)
-
 
 
 def get_input(msg, default):
@@ -74,11 +71,10 @@ def parse_cli_args_and_start_game():
         print("At least one player required. Use --player TYPE NAME")
         exit(1)
     player_configs = [{'type': t, 'name': n} for t, n in args.player]
-    game, players = make_game(args.planets, args.width, args.height, player_configs)
-    run_game_loop(game, players)
+    game, players = run_game(args.planets, args.width, args.height, player_configs)
 
 
-def main():
+def main_cli():
     import sys
     if len(sys.argv) > 1:
         parse_cli_args_and_start_game()
@@ -101,8 +97,12 @@ def main():
         for n in names:
             ptype = get_input(f"Enter type for {n} (human/AIRandom/AISpread): ", "human")
             player_configs.append({'type': ptype, 'name': n})
-        game, players = make_game(planet_count, width, height, player_configs)
-        run_game_loop(game, players)
+        run_game(planet_count, width, height, player_configs)
+
+
+def run_game(planet_count, width, height, player_configs):
+    game, players = make_game(planet_count, width, height, player_configs)
+    run_game_loop(game, players)
 
 
 async def player_main(game, players):
@@ -122,6 +122,17 @@ def run_game_loop(game, players):
     print_game(game)
 
 
+def batch_of_games():
+    cfg = [
+        {'type': 'airandom', 'name': 'rand'},
+        {'type': 'aispread', 'name': 'alpha'},
+        {'type': 'aispread', 'name': 'beta'}]
+    for i in range(100):
+        run_game(15, 8, 8, cfg)
+        print('\n\n\n********** DONE **********\n\n\n\n')
+
+
 if __name__ == '__main__':
-    main()
+    main_cli()
+    # batch_of_games()
 
