@@ -3,6 +3,7 @@ import asyncio
 import model
 import view
 import player
+import argparse
 
 DEBUG = True
 
@@ -36,11 +37,56 @@ def get_input(msg, default):
     return val
 
 
-def make_game():
-    if not DEBUG:
-        planet_count = get_input("Enter how many planets: ", 10)
-        width = get_input("Enter horizontal width of map: ", 4)
-        height = get_input("Enter vertical height of map: ", 4)
+def make_game(planet_count, width, height, player_configs):
+    names = [conf['name'] for conf in player_configs]
+    players = []
+    for idx, conf in enumerate(player_configs, 1):
+        ptype = conf['type'].lower()
+        if ptype == 'human':
+            players.append(player.ManualPlayerController(idx, conf['name']))
+        elif ptype == 'airandom':
+            players.append(player.AiPlayerControllerRandom(idx, conf['name']))
+        elif ptype == 'aispread':
+            players.append(player.AiPlayerControllerSpread(idx, conf['name']))
+        else:
+            raise ValueError(f"Unknown player type: {conf['type']}")
+    game = model.GameModel(names, width, height)
+    game.create_planets(planet_count)
+    return game, players
+
+
+def print_game(game):
+    [print() for _ in range(5)]
+    print("====== Turn {} ======".format(game.turn))
+    print("\n".join(view.game_to_str(game)))
+
+
+def parse_cli_args_and_start_game():
+    parser = argparse.ArgumentParser(description="Planet Sprawl Game")
+    parser.add_argument('--planets', type=int, default=10, help='Number of planets')
+    parser.add_argument('--width', type=int, default=5, help='Grid width')
+    parser.add_argument('--height', type=int, default=5, help='Grid height')
+    parser.add_argument('--player', action='append', nargs=2, metavar=('TYPE', 'NAME'),
+                        help='Add a player: TYPE NAME (TYPE: human, AIRandom, AISpread)')
+    args = parser.parse_args()
+
+    if not args.player:
+        print("At least one player required. Use --player TYPE NAME")
+        exit(1)
+    player_configs = [{'type': t, 'name': n} for t, n in args.player]
+    game, players = make_game(args.planets, args.width, args.height, player_configs)
+    run_game_loop(game, players)
+
+
+def main():
+    import sys
+    if len(sys.argv) > 1:
+        parse_cli_args_and_start_game()
+    else:
+        # Interactive fallback for manual testing
+        planet_count = int(get_input("Enter how many planets: ", 10))
+        width = int(get_input("Enter horizontal width of map: ", 4))
+        height = int(get_input("Enter vertical height of map: ", 4))
         default_names = ["foo", "buzz"]
         names = []
         while True:
@@ -51,30 +97,12 @@ def make_game():
             if name.strip() == "":
                 break
             names.append(name)
-        players = []  # HACK
-    else:
-        players = [
-            # player.ManualPlayerController(1, "Humn"),
-            # player.AiPlayerControllerRandom(1, "Rand"),
-            player.AiPlayerControllerSpread(1, "Alph"),
-            player.AiPlayerControllerSpread(2, "Beta"),
-            player.AiPlayerControllerSpread(3, "Cato"),
-            player.AiPlayerControllerRandom(4, "Doge"),
-        ]
-        names = [p.get_name() for p in players]
-        planet_count = 10
-        width = 5
-        height = 5
-
-    game = model.GameModel(names, width, height)
-    game.create_planets(planet_count)
-    return game, players
-
-
-def print_game(game):
-    [print() for _ in range(5)]
-    print("====== Turn {} ======".format(game.turn))
-    print("\n".join(view.game_to_str(game)))
+        player_configs = []
+        for n in names:
+            ptype = get_input(f"Enter type for {n} (human/AIRandom/AISpread): ", "human")
+            player_configs.append({'type': ptype, 'name': n})
+        game, players = make_game(planet_count, width, height, player_configs)
+        run_game_loop(game, players)
 
 
 async def player_main(game, players):
@@ -94,10 +122,6 @@ def run_game_loop(game, players):
     print_game(game)
 
 
-def main():
-    game, players = make_game()
-    run_game_loop(game, players)
-
-
 if __name__ == '__main__':
     main()
+
