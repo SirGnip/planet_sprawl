@@ -39,15 +39,15 @@ def test_fleet_view():
     fleets = [f1, f2]
     txt = view.fleets_to_str(fleets)
     assert len(txt) == 2
-    assert 'FooB' in txt[0]
-    assert 'FooB' in txt[1]
-    assert 'X' in txt[0]
-    assert 'Z' in txt[1]
+    assert "FooB" in txt[0]
+    assert "FooB" in txt[1]
+    assert "X" in txt[0]
+    assert "Z" in txt[1]
 
 
 def test_game_view():
     """General smoke test for the GameModel view"""
-    game = GameModel(['Foo', 'Bar'], 6, 6)
+    game = GameModel(["Foo", "Bar"], 6, 6)
     game.create_planets(10)
     txt = view.game_to_str(game)
     game.send(1, "A", "B", 5)

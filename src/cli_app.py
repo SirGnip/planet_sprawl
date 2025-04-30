@@ -35,16 +35,16 @@ def get_input(msg, default):
 
 
 def make_game(planet_count, width, height, player_configs):
-    names = [conf['name'] for conf in player_configs]
+    names = [conf["name"] for conf in player_configs]
     players = []
     for idx, conf in enumerate(player_configs, 1):
-        ptype = conf['type'].lower()
-        if ptype == 'human':
-            players.append(player.ManualPlayerController(idx, conf['name']))
-        elif ptype == 'ai_random':
-            players.append(player.AiPlayerControllerRandom(idx, conf['name']))
-        elif ptype == 'ai_spread':
-            players.append(player.AiPlayerControllerSpread(idx, conf['name']))
+        ptype = conf["type"].lower()
+        if ptype == "human":
+            players.append(player.ManualPlayerController(idx, conf["name"]))
+        elif ptype == "ai_random":
+            players.append(player.AiPlayerControllerRandom(idx, conf["name"]))
+        elif ptype == "ai_spread":
+            players.append(player.AiPlayerControllerSpread(idx, conf["name"]))
         else:
             raise ValueError(f"Unknown player type: {conf['type']}")
     game = model.GameModel(names, width, height)
@@ -60,17 +60,17 @@ def print_game(game):
 
 def parse_cli_args_and_start_game():
     parser = argparse.ArgumentParser(description="Planet Sprawl Game")
-    parser.add_argument('--planets', type=int, default=10, help='Number of planets')
-    parser.add_argument('--width', type=int, default=5, help='Grid width')
-    parser.add_argument('--height', type=int, default=5, help='Grid height')
-    parser.add_argument('--player', action='append', nargs=2, metavar=('TYPE', 'NAME'),
-                        help='Add a player: TYPE NAME (TYPE: human, ai_random, ai_spread)')
+    parser.add_argument("--planets", type=int, default=10, help="Number of planets")
+    parser.add_argument("--width", type=int, default=5, help="Grid width")
+    parser.add_argument("--height", type=int, default=5, help="Grid height")
+    parser.add_argument("--player", action="append", nargs=2, metavar=("TYPE", "NAME"),
+                        help="Add a player: TYPE NAME (TYPE: human, ai_random, ai_spread)")
     args = parser.parse_args()
 
     if not args.player:
         print("At least one player required. Use --player TYPE NAME")
         exit(1)
-    player_configs = [{'type': t, 'name': n} for t, n in args.player]
+    player_configs = [{"type": t, "name": n} for t, n in args.player]
     game, players = run_game(args.planets, args.width, args.height, player_configs)
 
 
@@ -88,7 +88,7 @@ def main_cli():
         for i in range(num_players):
             ptype = get_input(f"Enter player {i+1} type (human/ai_random/ai_spread): ", "human")
             name = get_input(f"Enter name for {ptype} player {i+1}: ", f"p{i+1}")
-            player_configs.append({'type': ptype, 'name': name})
+            player_configs.append({"type": ptype, "name": name})
         run_game(planet_count, width, height, player_configs)
 
 
@@ -101,7 +101,7 @@ def run_game(planet_count, width, height, player_configs, silent=False):
 async def player_main(game, players):
     tasks = [asyncio.create_task(p.make_move(game)) for p in players]
     await asyncio.gather(*tasks)  # Awaiting tasks allows exceptions to be caught and reraised by the custom event loop
-    print('main is done')
+    print("main is done")
 
 
 def run_game_loop(game, players, silent=False):
@@ -125,15 +125,15 @@ def run_game_loop(game, players, silent=False):
 
 def batch_of_games():
     cfg = [
-        {'type': 'ai_random', 'name': 'rand'},
-        {'type': 'ai_spread', 'name': 'alpha'},
-        {'type': 'ai_spread', 'name': 'beta'},
+        {"type": "ai_random", "name": "rand"},
+        {"type": "ai_spread", "name": "alpha"},
+        {"type": "ai_spread", "name": "beta"},
     ]
     for i in range(10):
         game = run_game(15, 8, 8, cfg, silent=True)
-        print(f'{i} {game.turn} {game.get_winner().name}')
+        print(f"{i} {game.turn} {game.get_winner().name}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main_cli()
     # batch_of_games()

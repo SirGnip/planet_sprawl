@@ -26,7 +26,7 @@ class ManualPlayerController(PlayerController):
         while True:  # Loop for entire game
             while True:  # Loop to get multiple moves
                 turn = input(f"  Enter move for {self.get_name()} #{self.idx} (<FROM> <TO> <SHIPS>, empty to end turn, or 'quit' to quit game completely): ")
-                if turn.strip().lower() == 'quit':
+                if turn.strip().lower() == "quit":
                     print(f"Player {self.get_name()} ({self.idx}) exited the game.")
                     raise PlayerExitException(f"Player {self.get_name()} exited the game.")
                 if turn.strip() == "":

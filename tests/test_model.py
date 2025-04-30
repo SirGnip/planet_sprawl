@@ -64,8 +64,8 @@ def test_fleet():
 
 def _create_test_game() -> GameModel:
     game = GameModel(["Foo", "Bar"], 4, 4)
-    game.grid.add(Planet(game.players[1], 'Able', Point(0, 0), 10, 1))
-    game.grid.add(Planet(game.players[2], 'Beta', Point(3, 0), 10, 1))
+    game.grid.add(Planet(game.players[1], "Able", Point(0, 0), 10, 1))
+    game.grid.add(Planet(game.players[2], "Beta", Point(3, 0), 10, 1))
     return game
 
 

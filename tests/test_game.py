@@ -5,8 +5,8 @@ import view
 
 def _create_test_game() -> model.GameModel:
     game = model.GameModel(["Foo", "Bar"], 4, 4)
-    game.grid.add(model.Planet(game.players[0], 'Able', model.Point(0, 0), 20, 1))
-    game.grid.add(model.Planet(game.players[1], 'Beta', model.Point(3, 0), 10, 1))
+    game.grid.add(model.Planet(game.players[0], "Able", model.Point(0, 0), 20, 1))
+    game.grid.add(model.Planet(game.players[1], "Beta", model.Point(3, 0), 10, 1))
     return game
 
 
