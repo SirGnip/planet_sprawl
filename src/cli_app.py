@@ -92,40 +92,46 @@ def main_cli():
         run_game(planet_count, width, height, player_configs)
 
 
-def run_game(planet_count, width, height, player_configs):
+def run_game(planet_count, width, height, player_configs, silent=False):
     game, players = make_game(planet_count, width, height, player_configs)
-    run_game_loop(game, players)
+    run_game_loop(game, players, silent)
+    return game
 
 
 async def player_main(game, players):
     tasks = [asyncio.create_task(p.make_move(game)) for p in players]
-    print(f'got {len(tasks)} tasks')
     await asyncio.gather(*tasks)  # Awaiting tasks allows exceptions to be caught and reraised by the custom event loop
     print('main is done')
 
 
-def run_game_loop(game, players):
+def run_game_loop(game, players, silent=False):
     event_loop = PlayerEventLoop(player_main(game, players))
     while not game.is_complete():
-        print_game(game)
+        if not silent:
+            print_game(game)
         try:
             event_loop.tick()
         except PlayerExitException as e:
             print(f"\nGame exited by player: Exception: {e}")
             break
         game.simulate()
-    game.events.add(game.turn, "GAME OVER!")
-    print_game(game)
+
+    winner = game.get_winner()
+    game.events.add(game.turn, f"GAME OVER! Winner: {winner.name}")
+
+    if not silent:
+        print_game(game)
 
 
 def batch_of_games():
     cfg = [
-        {'type': 'airandom', 'name': 'rand'},
-        {'type': 'aispread', 'name': 'alpha'},
-        {'type': 'aispread', 'name': 'beta'}]
-    for i in range(100):
-        run_game(15, 8, 8, cfg)
-        print('\n\n\n********** DONE **********\n\n\n\n')
+        {'type': 'ai_random', 'name': 'rand'},
+        {'type': 'ai_spread', 'name': 'alpha'},
+        {'type': 'ai_spread', 'name': 'beta'},
+    ]
+    for i in range(10):
+        game = run_game(15, 8, 8, cfg, silent=True)
+        print(f'{i} {game.turn} {game.get_winner().name}')
 
 
 if __name__ == '__main__':

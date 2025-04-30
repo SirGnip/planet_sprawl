@@ -7,6 +7,7 @@ At least it doesn't directly depend on anything UI related.
 
 import math
 import random
+from collections import Counter
 from dataclasses import dataclass, field
 
 
@@ -183,7 +184,7 @@ class GameModel:
         assert ships <= src.ships, f"{player.name} does not have {ships} ships on {src.get_abbreviation()}. There are {src.ships}."
         fleet = Fleet(player, src, trg, ships, self.turn)
         src.ships -= fleet.ships
-        print('SEND', fleet)
+        # print('SEND', fleet)
         self._add_fleet(fleet)
 
     def _add_fleet(self, fleet: Fleet):
@@ -194,10 +195,22 @@ class GameModel:
         if len(players) > 1:
             return False
         last_player = players.pop()
-        print(f'complete: {last_player}')
-        for f in self.fleets:
-            print(f'  fleet: {f}')
+        # print(f'complete: {last_player}')
+        # for f in self.fleets:
+        #     print(f'  fleet: {f}')
         return all(fleet.owner == last_player for fleet in self.fleets)
+
+    def get_winner(self):
+        # Count planets owned by each player (excluding neutral)
+        owner_counts = Counter()
+        for planet in self.grid.planets:
+            if planet.owner and not planet.owner.is_neutral:
+                owner_counts[planet.owner] += 1
+        if not owner_counts:
+            return None
+        # Return the player with the most planets
+        winner, _ = owner_counts.most_common(1)[0]
+        return winner
 
     def add_event(self, msg: str):
         self.events.add(self.turn, msg)

@@ -77,14 +77,14 @@ class AiPlayerControllerSpread(AiPlayerController):
                 closest_my_planet = min(my_planets, key=lambda p: closest_enemy.pos.distance(p.pos))
                 ships = int(closest_my_planet.ships * 0.8)
                 if ships > 0:
-                    print(f"*** {self.name} Attack-Sending {ships} ships from {closest_my_planet.get_abbreviation()} to {closest_enemy.get_abbreviation()}")
+                    # print(f"*** {self.name} Attack-Sending {ships} ships from {closest_my_planet.get_abbreviation()} to {closest_enemy.get_abbreviation()}")
                     game.send(self.idx, closest_my_planet.get_abbreviation(), closest_enemy.get_abbreviation(), ships)
 
                 # fortify - from planet with most ships to planet that is attacking
                 most_ships_planet = max(my_planets, key=lambda p: p.ships)
                 ships = int(most_ships_planet.ships * 0.8)
                 if most_ships_planet.ships > 10:
-                    print(f"*** {self.name} Fortify-Sending {ships} ships from {most_ships_planet.get_abbreviation()} to {closest_my_planet.get_abbreviation()}")
+                    # print(f"*** {self.name} Fortify-Sending {ships} ships from {most_ships_planet.get_abbreviation()} to {closest_my_planet.get_abbreviation()}")
                     game.send(self.idx, most_ships_planet.get_abbreviation(), closest_my_planet.get_abbreviation(), ships)
 
             await asyncio.sleep(0)
